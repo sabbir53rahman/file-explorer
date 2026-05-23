@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Folder,
   FolderOpen,
+  File,
   HardDrive,
   Menu,
   X,
@@ -15,30 +16,51 @@ import {
 interface SidebarProps {
   fileSystem: FileNode[];
   currentFolderId: string;
+  selectedFile: FileNode | null;
   onFolderSelect: (id: string) => void;
+  onFileSelect: (file: FileNode) => void;
 }
 
 interface FolderTreeProps {
   node: FileNode;
   currentFolderId: string;
+  selectedFile: FileNode | null;
   onFolderSelect: (id: string) => void;
+  onFileSelect: (file: FileNode) => void;
   level: number;
 }
 
 function FolderTree({
   node,
   currentFolderId,
+  selectedFile,
   onFolderSelect,
+  onFileSelect,
   level,
 }: FolderTreeProps) {
   const [isOpen, setIsOpen] = useState(level === 0);
   const isSelected = currentFolderId === node.id;
-
-  if (node.type !== "folder") {
-    return null;
-  }
+  const isFileSelected = selectedFile?.id === node.id;
 
   const hasChildren = node.children && node.children.length > 0;
+
+  if (node.type === "file") {
+    return (
+      <div
+        className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors duration-150 ${
+          isFileSelected
+            ? "bg-blue-50 text-blue-700"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        }`}
+        style={{ paddingLeft: `${level * 12 + 12}px` }}
+        onClick={() => onFileSelect(node)}
+      >
+        <span className="w-4 h-4" />
+        <File size={16} className="text-slate-400" />
+        <span className="text-sm font-medium truncate">{node.name}</span>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -77,7 +99,9 @@ function FolderTree({
               key={child.id}
               node={child}
               currentFolderId={currentFolderId}
+              selectedFile={selectedFile}
               onFolderSelect={onFolderSelect}
+              onFileSelect={onFileSelect}
               level={level + 1}
             />
           ))}
@@ -90,7 +114,9 @@ function FolderTree({
 export default function Sidebar({
   fileSystem,
   currentFolderId,
+  selectedFile,
   onFolderSelect,
+  onFileSelect,
 }: SidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -136,7 +162,9 @@ export default function Sidebar({
               key={node.id}
               node={node}
               currentFolderId={currentFolderId}
+              selectedFile={selectedFile}
               onFolderSelect={onFolderSelect}
+              onFileSelect={onFileSelect}
               level={0}
             />
           ))}

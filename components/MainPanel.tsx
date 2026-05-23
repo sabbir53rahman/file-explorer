@@ -62,6 +62,35 @@ const generateId = () => {
   return `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
+const getBreadcrumbPath = (nodes: FileNode[], targetId: string): FileNode[] => {
+  const path: FileNode[] = [];
+
+  const findPath = (node: FileNode, currentPath: FileNode[]): boolean => {
+    if (node.id === targetId) {
+      path.push(...currentPath, node);
+      return true;
+    }
+
+    if (node.children) {
+      for (const child of node.children) {
+        if (findPath(child, [...currentPath, node])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  for (const node of nodes) {
+    if (findPath(node, [])) {
+      break;
+    }
+  }
+
+  return path;
+};
+
 interface MainPanelProps {
   fileSystem: FileNode[];
   currentFolderId: string;
@@ -82,6 +111,8 @@ export default function MainPanel({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [itemToRename, setItemToRename] = useState<FileNode | null>(null);
+
+  const breadcrumbPath = getBreadcrumbPath(fileSystem, currentFolderId);
 
   const getCurrentFolder = (nodes: FileNode[], id: string): FileNode | null => {
     for (const node of nodes) {
@@ -196,15 +227,27 @@ export default function MainPanel({
     <div className="flex-1 bg-slate-50 p-4 sm:p-6">
       <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
         <div className="bg-slate-800 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FolderOpen size={18} className="text-white" />
-            <h2 className="text-sm font-medium text-white truncate">
-              {currentFolder?.name || 'Root'}
-            </h2>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <FolderOpen size={18} className="text-white shrink-0" />
+            <div className="flex items-center gap-1.5 text-sm text-white overflow-hidden">
+              {breadcrumbPath.map((folder, index) => (
+                <div key={folder.id} className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => onFolderSelect(folder.id)}
+                    className="hover:text-blue-300 transition-colors truncate"
+                  >
+                    {folder.name}
+                  </button>
+                  {index < breadcrumbPath.length - 1 && (
+                    <span className="text-slate-400 shrink-0">/</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors shrink-0"
           >
             <Plus size={14} />
             New

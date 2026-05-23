@@ -32,7 +32,9 @@ export default function Home() {
       <Sidebar
         fileSystem={fileSystem}
         currentFolderId={currentFolderId}
+        selectedFile={selectedFile}
         onFolderSelect={setCurrentFolderId}
+        onFileSelect={setSelectedFile}
       />
       <MainPanel
         fileSystem={fileSystem}
