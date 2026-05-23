@@ -234,7 +234,7 @@ export default function MainPanel({
                 <div key={folder.id} className="flex items-center gap-1.5">
                   <button
                     onClick={() => onFolderSelect(folder.id)}
-                    className="hover:text-blue-300 transition-colors truncate"
+                    className="hover:text-blue-300 transition-colors cursor-pointer truncate"
                   >
                     {folder.name}
                   </button>
